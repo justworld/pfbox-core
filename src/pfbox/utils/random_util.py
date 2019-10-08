@@ -131,5 +131,21 @@ class SnowFlaskID(object):
                 self.last_timestamp = now_timestamp
                 return
 
+    @classmethod
+    def melt(cls, id):
+        """
+        提取已有SnowFlaskID中的信息
+        :param id:
+        :return:
+        """
+        sequence_id = id & (cls.max_sequence_id - 1)
+        process_id = (id >> cls.sequence_id_bits) & (cls.max_process - 1)
+        mac_id = (id >> cls.sequence_id_bits >> cls.process_bits) & (cls.max_mac_id - 1)
+        version = (id >> cls.sequence_id_bits >> cls.process_bits >> cls.mac_id_bits) & (cls.max_version - 1)
+        timestamp_ms = id >> cls.sequence_id_bits >> cls.process_bits >> cls.mac_id_bits >> cls.version_bits
+        timestamp_ms += cls.twepoch
+
+        return (timestamp_ms, int(version), int(mac_id), int(process_id), int(sequence_id))
+
 
 snow_flask = SnowFlaskID()
